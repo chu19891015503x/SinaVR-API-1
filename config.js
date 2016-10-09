@@ -3,7 +3,7 @@ module.exports = {
         name: 'SinaVR API'
     },
     server: {
-        host: '127.0.0.1',
+        host: 'localhost',
         port: 8080
     },
     database: {
