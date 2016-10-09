@@ -1,3 +1,5 @@
+'use strict';
+
 var Joi = require('joi');
 var Boom = require('boom');
 var config = require('../../config');
@@ -162,10 +164,10 @@ module.exports.remove = {
             scope: {$ne: 'admin'}
         }, function(error, user) {
             if(error) {
-                reply(Boom.badImplementation('Cannot remove User'));
+                return reply(Boom.badImplementation('Cannot remove User'));
             } else if(_.isNull(user)) {
-                reply(Boom.notFound('Cannot find user with that ID'));
-            }
+                return reply(Boom.notFound('Cannot find user with that ID'));
+            } else if(user.delete)
             user.softdelete(function(error, data) {
                 if(error) {
                     reply(Boom.badImplementation('Cannot remove User'));

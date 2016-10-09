@@ -1,3 +1,5 @@
+'use strict';
+
 var UsersController = require('./users.controller');
 
 module.exports = [

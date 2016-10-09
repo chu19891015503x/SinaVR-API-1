@@ -1,3 +1,5 @@
+'use strict';
+
 var mainRoutes = require('./components/main/main.routes');
 var usersRoutes = require('./components/users/users.routes');
 
