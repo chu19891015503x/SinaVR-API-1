@@ -1,9 +1,9 @@
 'use strict';
 
-var mongoose   = require('mongoose');
+var mongoose   = require('../../database').mongoose;
 var config     = require('../../config');
 var bcrypt     = require('bcrypt');
-var moment     = require('moment');
+//var moment     = require('moment');
 var _          = require('lodash');
 var Schema     = mongoose.Schema;
 var softDelete = require('mongoose-softdelete');
@@ -34,12 +34,12 @@ userSchema.pre('save', function(next) {
 
     bcrypt.genSalt(config.security.workFactor, function(error, salt) {
         if(error) {
-            next(error);
+            return next(error);
         }
 
         bcrypt.hash(user.password, salt, function(error, hash) {
             if(error) {
-                next(error);
+                return next(error);
             }
             user.password = hash;
             next();

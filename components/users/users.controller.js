@@ -18,10 +18,7 @@ module.exports.create = {
             password: Joi.string().required()
         }
     },
-    auth: {
-        strategy: 'token',
-        scope: ['admin']
-    },
+    auth: false,
     handler: function(request, reply) {
         request.payload.scope = 'user';
         var user = new User(request.payload);
@@ -53,7 +50,7 @@ module.exports.getOne = {
         User.findOne({
             userName: request.params.userName,
             deleted: {$ne: true}
-        }, function(error, user) {
+        }).lean().exec(function(error, user) {
             if(!error) {
                 if(_.isNull(user)) {
                     reply(Boom.notFound('Cannot find user with that userName'));
@@ -82,7 +79,7 @@ module.exports.login = {
         User.findOne({
             userName: request.payload.userName,
             deleted: {$ne: true}
-        }, function(error, user) {
+        }).lean().exec(function(error, user) {
             if(error || _.isEmpty(user) || user == null) {
                 return reply(Boom.notFound('User with that userName do not exists'));
             }
@@ -113,7 +110,7 @@ module.exports.validateToken = function(decodedToken, callback) {
         User.findOne({
             userName: decodedToken.userName,
             deleted: {$ne: true}
-        }, function(error, matched) {
+        }).lean().exec(function(error, matched) {
             if(!_.isNull(matched)) {
                 return callback(error, true, {userName: matched.userName, scope: [matched.scope]});
             } else {
@@ -131,7 +128,7 @@ module.exports.getAll = {
     notes: '获得全部用户信息',
     auth: false,
     handler: function(request, reply) {
-        User.find({ deleted: {$ne: true} }, function(error, users) {
+        User.find({ deleted: {$ne: true} }).lean().exec(function(error, users) {
             if(!error) {
                 if(_.isEmpty(users)) {
                     reply(Boom.notFound('Cannot find any user'));
@@ -141,7 +138,7 @@ module.exports.getAll = {
             } else {
                 reply(Boom.badImplementation('Unknown error has appears'));
             }
-        })
+        });
     }
 };
 
@@ -167,14 +164,18 @@ module.exports.remove = {
                 return reply(Boom.badImplementation('Cannot remove User'));
             } else if(_.isNull(user)) {
                 return reply(Boom.notFound('Cannot find user with that ID'));
-            } else if(user.delete)
-            user.softdelete(function(error, data) {
-                if(error) {
-                    reply(Boom.badImplementation('Cannot remove User'));
-                } else {
-                    reply({code: 200, message: 'User removed successfully'});
-                }
-            });
+            } else if(!user.deleted) {
+                user.softdelete(function(error, data) {
+                    if(error) {
+                        reply(Boom.badImplementation('Cannot remove User'));
+                    } else {
+                        reply({code: 200, message: 'User removed successfully'});
+                    }
+                });
+            }
+            else {
+                reply(Boom.badImplementation('User has already removed'));
+            }
         });
     }
 };

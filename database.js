@@ -1,9 +1,15 @@
 'use strict';
 
-var mongoose = require('mongoose');
 var config = require('./config');
+var mongoose = require('mongoose');
+var Redis = require('ioredis');
+var redisClient = new Redis(config.redis.port, config.redis.host);
+var MongooseRedis = require('mongoose-with-redis');
+
 
 mongoose.connect('mongodb://'+config.database.host+'/'+config.database.db);
+
+MongooseRedis(mongoose, redisClient, config.cacheOptions);
 
 var db = mongoose.connection;
 db.on('error', function() {

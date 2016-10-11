@@ -15,6 +15,15 @@ module.exports = {
         username: '',
         password: ''
     },
+    cacheOptions: {
+        cache: true,
+        expires: 60,
+        prefix: 'RedisCache'
+    },
+    redis: {
+        host: '127.0.0.1',
+        port: 6379
+    },
     scopes: [
         'admin',
         'user'
