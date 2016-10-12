@@ -84,8 +84,11 @@ module.exports.validateToken = function(decodedToken, callback) {
 };
 
 module.exports.getAll = function(request, reply) {
-    User.find({ deleted: {$ne: true} }).lean().exec(function(error, users) {
-        if(!error) {
+    var page = request.query.page || 1;
+    var pageSize = request.query.pageSize || 10;
+    var start = (page - 1) * pageSize;
+    User.find({ deleted: {$ne: true} }).skip(start).limit(pageSize).sort({createdAt:'desc'}).lean().exec(function(error, users) {
+      if(!error) {
             if(_.isEmpty(users)) {
                 reply(Boom.notFound('Cannot find any user'));
             } else {

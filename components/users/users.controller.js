@@ -54,6 +54,12 @@ module.exports.getAll = {
     tags: ['api'],
     description: '获取全部用户',
     notes: '获得全部用户信息',
+    validate: {
+        query: {
+            page: Joi.number().integer().description('页号，默认值 1'),
+            pageSize: Joi.number().integer().description('每页条数，默认 20')
+        }
+    },
     auth: false,
     handler: UsersService.getAll
 };

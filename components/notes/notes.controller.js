@@ -34,7 +34,7 @@ module.exports.getOne = {
     notes: '根据帖子id获得帖子详情',
     validate: {
         params: {
-            noteId: Joi.string().regex(/[0-9]/)
+            noteId: Joi.number().integer()
         }
     },
     auth: false,
@@ -45,6 +45,12 @@ module.exports.getAll = {
     tags: ['api'],
     description: '获取全部帖子',
     notes: '获得全部帖子信息',
+    validate: {
+        query: {
+            page: Joi.number().integer().description('页号，默认值 1'),
+            pageSize: Joi.number().integer().description('每页条数，默认 20')
+        }
+    },
     auth: false,
     handler: NotesService.getAll
 };
@@ -55,7 +61,7 @@ module.exports.remove = {
     notes: '根据帖子id删除指定帖子',
     validate: {
         params: {
-            noteId: Joi.string().regex(/[0-9]/)
+            noteId: Joi.number().integer()
         }
     },
     auth: {

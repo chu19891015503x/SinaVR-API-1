@@ -33,7 +33,10 @@ module.exports.getOne = function(request, reply) {
 };
 
 module.exports.getAll = function(request, reply) {
-    Note.find({ deleted: {$ne: true} }).lean().exec(function(error, notes) {
+    var page = request.query.page || 1;
+    var pageSize = request.query.pageSize || 10;
+    var start = (page - 1) * pageSize;
+    Note.find({ deleted: {$ne: true} }).skip(start).limit(pageSize).sort({noteId:'desc'}).lean().exec(function(error, notes) {
         if(!error) {
             if(_.isEmpty(notes)) {
                 reply(Boom.notFound('Cannot find any note'));
