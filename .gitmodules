@@ -1,0 +1,3 @@
+[submodule "node_modules/flocon/lib/fast_int_to_string"]
+	path = node_modules/flocon/lib/fast_int_to_string
+	url = https://github.com/zhipeng515/fast_int_to_string.git

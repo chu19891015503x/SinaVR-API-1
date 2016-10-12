@@ -6,7 +6,7 @@ var config = require('./config');
 var db = require('./database');
 //var jwt = require('jsonwebtoken');
 var moment = require('moment');
-var UsersController = require('./components/users/users.controller');
+var UsersService = require('./components/users/users.service');
 var _ = require('lodash');
 
 const Chalk = require('chalk');
@@ -64,7 +64,7 @@ server.register(
     function(error) {
         server.auth.strategy('token', 'jwt', {
             key: config.token.privateKey,
-            validateFunc: UsersController.validateToken
+            validateFunc: UsersService.validateToken
         });
         server.route(routes);
     }

@@ -7,6 +7,7 @@ var Jwt = require('jsonwebtoken');
 var Note = require('./note.model');
 var _ = require('lodash');
 var moment = require('moment');
+var NotesService = require('./notes.service');
 
 module.exports.create = {
     tags: ['api'],
@@ -24,16 +25,7 @@ module.exports.create = {
         strategy: 'token',
         scope: ['admin']
     },
-    handler: function(request, reply) {
-        var note = new Note(request.payload);
-        note.save(request.payload, function(error, note) {
-            if(!error) {
-                reply('Note created successfully, noteId: '+note.noteId);
-            } else {
-                reply(Boom.badImplementation('Cannot create Note'));
-            }
-        });
-    }
+    handler: NotesService.create
 };
 
 module.exports.getOne = {
@@ -46,22 +38,7 @@ module.exports.getOne = {
         }
     },
     auth: false,
-    handler: function(request, reply) {
-    Note.findOne({
-        noteId: request.params.noteId,
-        deleted: {$ne: true}
-    }).lean().exec(function(error, note) {
-        if(!error) {
-            if(_.isNull(note)) {
-                reply(Boom.notFound('Cannot find note with that noteId'));
-            } else {
-                reply(note);
-            }
-        } else {
-            reply(Boom.notFound('Cannot find note with that noteId'));
-        }
-    })
-}
+    handler: NotesService.getOne
 };
 
 module.exports.getAll = {
@@ -69,19 +46,7 @@ module.exports.getAll = {
     description: '获取全部帖子',
     notes: '获得全部帖子信息',
     auth: false,
-    handler: function(request, reply) {
-        Note.find({ deleted: {$ne: true} }).lean().exec(function(error, notes) {
-            if(!error) {
-                if(_.isEmpty(notes)) {
-                    reply(Boom.notFound('Cannot find any note'));
-                } else {
-                    reply(notes);
-                }
-            } else {
-                reply(Boom.badImplementation('Unknown error has appears'));
-            }
-        });
-    }
+    handler: NotesService.getAll
 };
 
 module.exports.remove = {
@@ -97,27 +62,5 @@ module.exports.remove = {
         strategy: 'token',
         scope: ['admin']
     },
-    handler: function(request, reply) {
-        Note.findOne({
-            noteId: request.params.noteId,
-            scope: 'admin'
-        }, function(error, note) {
-            if(error) {
-                return reply(Boom.badImplementation('Cannot remove Note'));
-            } else if(_.isNull(note)) {
-                return reply(Boom.notFound('Cannot find note with that ID'));
-            } else if(!note.deleted) {
-                note.softdelete(function (error, data) {
-                    if (error) {
-                        reply(Boom.badImplementation('Cannot remove Note'));
-                    } else {
-                        reply({code: 200, message: 'Note removed successfully'});
-                    }
-                });
-            }
-            else {
-                reply({code: 200, message: 'Note has already removed'});
-            }
-        });
-    }
+    handler: NotesService.remove
 };
