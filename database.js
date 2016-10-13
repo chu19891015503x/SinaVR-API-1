@@ -9,6 +9,8 @@ var MongooseRedis = require('mongoose-with-redis');
 
 mongoose.connect('mongodb://'+config.database.host+'/'+config.database.db);
 
+mongoose.Promise = require('bluebird');
+
 MongooseRedis(mongoose, redisClient, config.cacheOptions);
 
 var db = mongoose.connection;

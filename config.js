@@ -15,6 +15,11 @@ module.exports = {
         username: '',
         password: ''
     },
+    log: {
+        host: '127.0.0.1',
+        port: 27017,
+        db: 'logs'
+    },
     cacheOptions: {
         cache: true,
         expires: 60,

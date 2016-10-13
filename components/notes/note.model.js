@@ -8,7 +8,7 @@ var config     = require('../../config')
 var softDelete = require('mongoose-softdelete');
 
 var noteSchema = new Schema({
-    noteId        : { type: Number, unique: true, required: true, default: -1 },
+    noteId        : { type: Number, index: true, unique: true, required: true, default: -1 },
     title         : { type: String, required: true, trim: true },
     content       : { type: String, required: true, trim: true },
     scope         : { type: String, enum: config.scopes, default: config.scopes[0] },
@@ -22,7 +22,7 @@ noteSchema.plugin(softDelete);
 noteSchema.pre('save', function(next) {
     var note = this;
 
-    if(note.noteId == -1 ) {
+    if(note.isNew && note.noteId == -1 ) {
         note.noteId = sequence.snow();
     }
     next();

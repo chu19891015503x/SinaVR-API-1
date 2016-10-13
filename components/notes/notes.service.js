@@ -8,7 +8,7 @@ module.exports.create = function(request, reply) {
     var note = new Note(request.payload);
     note.save(request.payload, function(error, note) {
         if(!error) {
-            reply('Note created successfully, noteId: '+note.noteId);
+            reply('Note created successfully, noteId: '+ note.noteId);
         } else {
             reply(Boom.badImplementation('Cannot create Note'));
         }
@@ -36,7 +36,7 @@ module.exports.getAll = function(request, reply) {
     var page = request.query.page || 1;
     var pageSize = request.query.pageSize || 10;
     var start = (page - 1) * pageSize;
-    Note.find({ deleted: {$ne: true} }).skip(start).limit(pageSize).sort({noteId:'desc'}).lean().exec(function(error, notes) {
+    Note.find({ deleted: {$ne: true} }).skip(start).limit(pageSize).sort({createdAt:'desc'}).lean().exec(function(error, notes) {
         if(!error) {
             if(_.isEmpty(notes)) {
                 reply(Boom.notFound('Cannot find any note'));
