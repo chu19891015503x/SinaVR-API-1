@@ -1,10 +1,7 @@
 'use strict';
 
 var Joi = require('joi');
-var Boom = require('boom');
 var config = require('../../config');
-var Jwt = require('jsonwebtoken');
-var User = require('./user.model');
 var _ = require('lodash');
 var moment = require('moment');
 var UsersService = require('./users.service')
@@ -56,8 +53,8 @@ module.exports.getAll = {
     notes: '获得全部用户信息',
     validate: {
         query: {
-            page: Joi.number().integer().description('页号，默认值 1'),
-            pageSize: Joi.number().integer().description('每页条数，默认 20')
+            lastId: Joi.number().integer().description('起始Id，为空从头开始'),
+            pageSize: Joi.number().integer().min(1).max(100).default(20).description('每页条数(1-100)')
         }
     },
     auth: false,

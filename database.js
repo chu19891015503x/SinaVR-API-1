@@ -11,7 +11,7 @@ mongoose.connect('mongodb://'+config.database.host+'/'+config.database.db);
 
 mongoose.Promise = require('bluebird');
 
-MongooseRedis(mongoose, redisClient, config.cacheOptions);
+//MongooseRedis(mongoose, redisClient, config.cacheOptions);
 
 var db = mongoose.connection;
 db.on('error', function() {

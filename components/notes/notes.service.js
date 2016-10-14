@@ -19,7 +19,7 @@ module.exports.getOne = function(request, reply) {
     Note.findOne({
         noteId: request.params.noteId,
         deleted: {$ne: true}
-    }).lean().exec(function(error, note) {
+    }).select('-_id -deletedAt -deleted -__v -createdAt').lean().exec(function(error, note) {
         if(!error) {
             if(_.isNull(note)) {
                 reply(Boom.notFound('Cannot find note with that noteId'));
@@ -32,11 +32,32 @@ module.exports.getOne = function(request, reply) {
     });
 };
 
+module.exports.updateOne = function(request, reply) {
+    Note.findOneAndUpdate(
+        {
+            noteId: request.params.noteId,
+            deleted: {$ne: true}
+        },
+        request.payload,
+        {new: true} // 为真返回更新之后的内容
+        ).select('-_id -deletedAt -deleted -__v -createdAt').lean().exec(function(error, note) {
+        if(!error) {
+            if(_.isNull(note)) {
+                reply(Boom.notFound('Cannot find note with that noteId'));
+            } else {
+                reply(note);
+            }
+        } else {
+            reply(Boom.notFound('Cannot find note with that noteId'));
+        }
+    });
+};
+
+
 module.exports.getAll = function(request, reply) {
-    var page = request.query.page || 1;
-    var pageSize = request.query.pageSize || 10;
-    var start = (page - 1) * pageSize;
-    Note.find({ deleted: {$ne: true} }).skip(start).limit(pageSize).sort({createdAt:'desc'}).lean().exec(function(error, notes) {
+    var pageSize = request.query.pageSize || 20;
+    var start = request.query.lastId || Number.MAX_VALUE;
+    Note.find({ deleted: {$ne: true}, noteId: {$lt: start} }).select('-_id -deletedAt -deleted -__v').limit(pageSize).sort({createdAt:'desc'}).lean().exec(function(error, notes) {
         if(!error) {
             if(_.isEmpty(notes)) {
                 reply(Boom.notFound('Cannot find any note'));
@@ -68,7 +89,7 @@ module.exports.remove = function(request, reply) {
             });
         }
         else {
-            reply({code: 200, message: 'Note has already removed'});
+            reply({code: 201, message: 'Note has already removed'});
         }
     });
 };

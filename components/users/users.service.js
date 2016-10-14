@@ -3,13 +3,15 @@
 var Boom = require('boom');
 var User = require('./user.model');
 var _ = require('lodash');
+var Jwt = require('jsonwebtoken');
+var config = require('../../config');
 
 module.exports.create = function(request, reply) {
     request.payload.scope = 'user';
     var user = new User(request.payload);
     user.save(request.payload, function(error, user) {
         if(!error) {
-            reply('User created successfully, userId: '+user._id);
+            reply('User created successfully, userId: '+user.userId);
         } else {
             if (11000 === error.code || 11001 === error.code) {
                 reply(Boom.badRequest("User with this email already exists"));
@@ -24,7 +26,7 @@ module.exports.getOne = function(request, reply) {
     User.findOne({
         userName: request.params.userName,
         deleted: {$ne: true}
-    }).lean().exec(function(error, user) {
+    }).select('-_id -deletedAt -deleted -__v -password').lean().exec(function(error, user) {
         if(!error) {
             if(_.isNull(user)) {
                 reply(Boom.notFound('Cannot find user with that userName'));
@@ -41,12 +43,12 @@ module.exports.login = function(request, reply) {
     User.findOne({
         userName: request.payload.userName,
         deleted: {$ne: true}
-    }).lean().exec(function(error, user) {
+    }, function(error, user) {
         if(error || _.isEmpty(user) || user == null) {
             return reply(Boom.notFound('User with that userName do not exists'));
         }
 
-        user.comparePasswords(request.payload.password, user.password, function(error, isMatch) {
+        user.comparePassword(request.payload.password, user.password, function(error, isMatch) {
             if(error) {
                 reply(Boom.badImplementation('Unknown error has occurred'));
             }
@@ -71,7 +73,7 @@ module.exports.validateToken = function(decodedToken, callback) {
         User.findOne({
             userName: decodedToken.userName,
             deleted: {$ne: true}
-        }).lean().exec(function(error, matched) {
+        }).select('-_id -deletedAt -deleted -__v -password').lean().exec(function(error, matched) {
             if(!_.isNull(matched)) {
                 return callback(error, true, {userName: matched.userName, scope: [matched.scope]});
             } else {
@@ -84,10 +86,9 @@ module.exports.validateToken = function(decodedToken, callback) {
 };
 
 module.exports.getAll = function(request, reply) {
-    var page = request.query.page || 1;
-    var pageSize = request.query.pageSize || 10;
-    var start = (page - 1) * pageSize;
-    User.find({ deleted: {$ne: true} }).skip(start).limit(pageSize).sort({createdAt:'desc'}).lean().exec(function(error, users) {
+    var pageSize = request.query.pageSize || 20;
+    var start = request.query.lastId || Number.MAX_VALUE;
+    User.find({ deleted: {$ne: true}, userId: {$lt: start} }).select('-_id -deletedAt -deleted -__v -password').limit(pageSize).sort({createdAt:'desc'}).lean().exec(function(error, users) {
       if(!error) {
             if(_.isEmpty(users)) {
                 reply(Boom.notFound('Cannot find any user'));

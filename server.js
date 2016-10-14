@@ -33,6 +33,13 @@ server.connection(
     }
 );
 
+var initServer = function () {
+    server.auth.strategy('token', 'jwt', {
+        key: config.token.privateKey,
+        validateFunc: UsersService.validateToken
+    });
+    server.route(routes);
+}
 
 if(process.env.NODE_ENV == "development") {
     const Pack = require('./package')
@@ -61,26 +68,14 @@ if(process.env.NODE_ENV == "development") {
                 'options': options
             }
         ],
-        function (error) {
-            server.auth.strategy('token', 'jwt', {
-                key: config.token.privateKey,
-                validateFunc: UsersService.validateToken
-            });
-            server.route(routes);
-        }
+        initServer
     );
 } else {
     server.register(
         [
             require('hapi-auth-jwt'),
         ],
-        function (error) {
-            server.auth.strategy('token', 'jwt', {
-                key: config.token.privateKey,
-                validateFunc: UsersService.validateToken
-            });
-            server.route(routes);
-        }
+        initServer
     );
 
 }

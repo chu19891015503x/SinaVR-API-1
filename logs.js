@@ -5,9 +5,10 @@ var log4js = require('log4js');
 
 log4js.configure({
     appenders: [
-        // {
-        //     type: 'console'
-        // },
+        {
+            type: 'console',
+            category: 'console'
+        },
         {
             type: 'log4js-node-mongodb',
             connectionString: config.log.host + ':' + config.log.port + '/' + config.log.db,
