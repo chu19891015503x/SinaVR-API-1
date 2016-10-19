@@ -1,6 +1,6 @@
 'use strict';
 
-var sequence   = require('flocon')
+var sequence   = require('flocon-new')
 
 module.exports = function(schema) {
     schema.add({ id: { type: Number, index: true, unique: true, default: -1 } });

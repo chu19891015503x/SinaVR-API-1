@@ -12,13 +12,15 @@ module.exports = {
         host: '127.0.0.1',
         port: 27017,
         db: 'SinaVR',
-        username: '',
-        password: ''
+        username: 'SinaVR',
+        password: 'h9dixwi4yrNHH8N5'
     },
     log: {
         host: '127.0.0.1',
         port: 27017,
-        db: 'logs'
+        db: 'logs',
+        username: 'logs',
+        password: 'uJvBR1SYSEfSmu4u'
     },
     cacheOptions: {
         cache: true,

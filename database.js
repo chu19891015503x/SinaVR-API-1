@@ -7,7 +7,7 @@ var redisClient = new Redis(config.redis.port, config.redis.host);
 var MongooseRedis = require('mongoose-with-redis');
 
 
-mongoose.connect('mongodb://'+config.database.host+'/'+config.database.db);
+mongoose.connect('mongodb://'+config.database.username+':'+config.database.password+'@'+config.database.host+'/'+config.database.db);
 
 mongoose.Promise = require('bluebird');
 

@@ -2,7 +2,7 @@
 
 var database   = require('../../database')
 var mongoose   = database.mongoose;
-var sequence   = require('flocon')
+var sequence   = require('flocon-new')
 var Schema     = mongoose.Schema;
 var config     = require('../../config')
 var softDelete = require('mongoose-softdelete');

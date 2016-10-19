@@ -5,13 +5,11 @@ var Boom = require('boom');
 var Hoek = require('hoek');
 var _ = require('lodash');
 
-var mongoose   = require('./database').mongoose;
 var config     = require('./config');
 var softDelete = require('mongoose-softdelete');
 var sqeuenceId = require('./mongoose-sequenceid');
 
-var Schema = mongoose.Schema;
-
+var Schema = require('mongoose').Schema;
 
 function apiBuilder(schemaDefination, routeBaseName, modelName, singularRouteName, db, options){
 
@@ -20,17 +18,17 @@ function apiBuilder(schemaDefination, routeBaseName, modelName, singularRouteNam
     Hoek.assert(modelName, 'Model Name is required');
     Hoek.assert(singularRouteName, 'Singular Model\'s Route Name is required');
 
-    var validations = {}
-    var schema = null;
-    var model = null;
-    var controllers = {};
-    var routes = [];
+    // var validations = {}
+    // var schema = null;
+    // var model = null;
+    // var controllers = {};
+    // var routes = [];
 
-    validations = buildValidationObject(schemaDefination);
-    schema = buildSchema(validations.schema, validations.reply);
-    model = buildModel(modelName, schema, db);
-    controllers = buildControllers(model, validations, singularRouteName, options);
-    routes = buildRoutes(controllers, routeBaseName, singularRouteName, options);
+    var validations = buildValidationObject(schemaDefination);
+    var schema = buildSchema(validations.schema, validations.reply);
+    var model = buildModel(modelName, schema, db);
+    var controllers = buildControllers(model, validations, singularRouteName, options);
+    var routes = buildRoutes(controllers, routeBaseName, singularRouteName, options);
 
     return {
         validations: {
@@ -91,23 +89,23 @@ function getOptions(from, method, type, item, options) {
     return result;
 }
 
-function getHandlerFromOptions(method, options) {
+function getControllerHandlerFromOptions(method, options) {
     return getOptions('controllers', method, 'function', 'handler', options);
 }
 
-function getValidateFromOptions(method, options) {
+function getControllerValidateFromOptions(method, options) {
     return getOptions('controllers', method, 'object', 'validate', options);
 }
 
-function getResponseFromOptions(method, options) {
+function getControllerResponseFromOptions(method, options) {
     return getOptions('controllers', method, 'object', 'response', options);
 }
 
-function getDescriptionFromOptions(method, options) {
+function getRouteDescriptionFromOptions(method, options) {
     return getOptions('routes', method, 'string', 'description', options);
 }
 
-function getNotesFromOptions(method, options) {
+function getRouteNotesFromOptions(method, options) {
     return getOptions('routes', method, 'string', 'notes', options);
 }
 
@@ -118,18 +116,18 @@ function getRouteDisableFromOptions(method, options) {
 function buildControllers(model, joiValidationObject, singularRouteName, options){
     var controllers = {
         getAll: {
-            validate: getValidateFromOptions('getAll', options) || {
+            validate: getControllerValidateFromOptions('getAll', options) || {
                 query: {
                     lastId: Joi.number().integer().description('The last id, from lastest ' + singularRouteName + ' with an unspecified value'),
                     pageSize: Joi.number().integer().min(1).max(100).default(20).
                     description('The number of ' + singularRouteName + ' per pages(1-100), default value is 20')
                 }
             },
-            response: getResponseFromOptions('getAll', options) || {
+            response: getControllerResponseFromOptions('getAll', options) || {
                 sample: 50,
                 schema: Joi.array().items(joiValidationObject.reply)
             },
-            handler: getHandlerFromOptions('getAll', options) || function(request, reply) {
+            handler: getControllerHandlerFromOptions('getAll', options) || function(request, reply) {
                 var pageSize = request.query.pageSize || 20;
                 var lastId = request.query.lastId || Number.MAX_VALUE;
                 model.findAll(lastId, pageSize, function(err, data) {
@@ -146,15 +144,15 @@ function buildControllers(model, joiValidationObject, singularRouteName, options
             }
         },
         getOne: {
-            validate: getValidateFromOptions('getOne', options) || {
+            validate: getControllerValidateFromOptions('getOne', options) || {
                 params: {
                     id: Joi.number().integer().required()
                 }
             },
-            response: getResponseFromOptions('getOne', options) || {
+            response: getControllerResponseFromOptions('getOne', options) || {
                 schema: joiValidationObject.reply
             },
-            handler: getHandlerFromOptions('getOne', options) || function(request, reply) {
+            handler: getControllerHandlerFromOptions('getOne', options) || function(request, reply) {
                 model.findByIdLean(request.params.id,
                     function (err, data) {
                         if (!err) {
@@ -171,12 +169,12 @@ function buildControllers(model, joiValidationObject, singularRouteName, options
             }
         },
         create: {
-            validate: getValidateFromOptions('create', options) || {
+            validate: getControllerValidateFromOptions('create', options) || {
                 payload: joiValidationObject.post
             },
-            response: getResponseFromOptions('create', options) || {
+            response: getControllerResponseFromOptions('create', options) || {
             },
-            handler: getHandlerFromOptions('create', options) || function(request, reply) {
+            handler: getControllerHandlerFromOptions('create', options) || function(request, reply) {
                 var payload = request.payload;
                 var object = new model(payload);
                 object.save(function(err, data) {
@@ -193,15 +191,15 @@ function buildControllers(model, joiValidationObject, singularRouteName, options
             }
         },
         update: {
-            validate: getValidateFromOptions('update', options) || {
+            validate: getControllerValidateFromOptions('update', options) || {
                 params: {
                     id: Joi.number().integer().required()
                 },
                 payload: joiValidationObject.put
             },
-            response: getResponseFromOptions('update', options) || {
+            response: getControllerResponseFromOptions('update', options) || {
             },
-            handler: getHandlerFromOptions('update', options) || function(request, reply) {
+            handler: getControllerHandlerFromOptions('update', options) || function(request, reply) {
                 model.findByIdAndUpdate(request.params.id, request.payload, function(error, data) {
                     if(!error) {
                         if(_.isNull(data)) {
@@ -216,14 +214,14 @@ function buildControllers(model, joiValidationObject, singularRouteName, options
             }
         },
         remove: {
-            validate: getValidateFromOptions('remove', options) || {
+            validate: getControllerValidateFromOptions('remove', options) || {
                 params: {
                     id: Joi.number().integer().required()
                 }
             },
-            response: getResponseFromOptions('remove', options) || {
+            response: getControllerResponseFromOptions('remove', options) || {
             },
-            handler: getHandlerFromOptions('remove', options) || function(request, reply) {
+            handler: getControllerHandlerFromOptions('remove', options) || function(request, reply) {
                 model.findById(request.params.id,
                     function (error, data) {
                         if (error) {
@@ -260,8 +258,8 @@ function buildRoutes(controllers, routeBaseName, singularRouteName, options){
             config: {
                 validate: controllers.getAll.validate,
                 response: controllers.getAll.response,
-                description: getDescriptionFromOptions('getAll', options) || 'Get all ' + routeBaseName + '',
-                notes: getNotesFromOptions('getAll', options) || 'Returns a list of ' + routeBaseName + ' ordered by addition date',
+                description: getRouteDescriptionFromOptions('getAll', options) || 'Get all ' + routeBaseName + '',
+                notes: getRouteNotesFromOptions('getAll', options) || 'Returns a list of ' + routeBaseName + ' ordered by addition date',
                 tags: ['api', routeBaseName],
             },
             handler : controllers.getAll.handler
@@ -274,8 +272,8 @@ function buildRoutes(controllers, routeBaseName, singularRouteName, options){
             config: {
                 validate: controllers.getOne.validate,
                 response: controllers.getOne.response,
-                description: getDescriptionFromOptions('getAll', options) || 'Get ' + singularRouteName + ' by DB Id',
-                notes: getNotesFromOptions('getAll', options) || 'Returns the ' + singularRouteName + ' object if matched with the DB id',
+                description: getRouteDescriptionFromOptions('getAll', options) || 'Get ' + singularRouteName + ' by DB Id',
+                notes: getRouteNotesFromOptions('getAll', options) || 'Returns the ' + singularRouteName + ' object if matched with the DB id',
                 tags: ['api', routeBaseName],
             },
             handler : controllers.getOne.handler
@@ -288,8 +286,8 @@ function buildRoutes(controllers, routeBaseName, singularRouteName, options){
             config: {
                 validate: controllers.update.validate,
                 response: controllers.update.response,
-                description: getDescriptionFromOptions('update', options) || 'Update a ' + singularRouteName,
-                notes: getNotesFromOptions('update', options) ||  'Returns a ' + singularRouteName + ' by the id passed in the path',
+                description: getRouteDescriptionFromOptions('update', options) || 'Update a ' + singularRouteName,
+                notes: getRouteNotesFromOptions('update', options) ||  'Returns a ' + singularRouteName + ' by the id passed in the path',
                 tags: ['api', routeBaseName],
             },
             handler : controllers.update.handler
@@ -302,8 +300,8 @@ function buildRoutes(controllers, routeBaseName, singularRouteName, options){
             config: {
                 validate: controllers.remove.validate,
                 response: controllers.remove.response,
-                description: getDescriptionFromOptions('remove', options) || 'Delete ' + singularRouteName,
-                notes: getNotesFromOptions('remove', options) || 'Returns the ' + singularRouteName + ' deletion status',
+                description: getRouteDescriptionFromOptions('remove', options) || 'Delete ' + singularRouteName,
+                notes: getRouteNotesFromOptions('remove', options) || 'Returns the ' + singularRouteName + ' deletion status',
                 tags: ['api', routeBaseName],
             },
             handler: controllers.remove.handler
@@ -316,8 +314,8 @@ function buildRoutes(controllers, routeBaseName, singularRouteName, options){
             config: {
                 validate: controllers.create.validate,
                 response: controllers.create.response,
-                description: getDescriptionFromOptions('create', options) || 'Add a ' + singularRouteName,
-                notes: getNotesFromOptions('create', options) || 'Returns a ' + singularRouteName + ' by the id passed in the path',
+                description: getRouteDescriptionFromOptions('create', options) || 'Add a ' + singularRouteName,
+                notes: getRouteNotesFromOptions('create', options) || 'Returns a ' + singularRouteName + ' by the id passed in the path',
                 tags: ['api', routeBaseName],
             },
             handler : controllers.create.handler
