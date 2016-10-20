@@ -29,62 +29,57 @@ server.connection(
     }
 );
 
-var initServer = function () {
+var plugins = [
+    require('hapi-auth-jwt'),
+    {
+        'register': require('restfulapigenerator'),
+        'options': {
+            componentPath: __dirname + '/components/',
+            db: require('./database').mongoose
+        }
+    },
+    require('./server.filter')
+];
+
+if(process.env.NODE_ENV == "development") {
+    plugins = plugins.concat([
+        require('inert'),
+        require('vision'),
+        {
+            'register': require('hapi-swagger'),
+            'options': {
+                info: {
+                    'title': 'SinaVR API Documentation',
+                    'version': require('./package').version,
+                },
+                securityDefinitions: {
+                    'jwt': {
+                        'type': 'apiKey',
+                        'name': 'Authorization',
+                        'in': 'header'
+                    }
+                },
+                debug: true
+            }
+        }
+    ]);
+}
+
+server.register(plugins, (err) => {
+    if (err) {
+        throw err; // something bad happened loading the plugin
+    }
+
     server.auth.strategy('token', 'jwt', {
         key: config.token.privateKey,
         validateFunc: UsersService.validateToken
     });
     server.route(routes);
-}
 
-if(process.env.NODE_ENV == "development") {
-    const Pack = require('./package')
-    const options =
-
-    server.register(
-        [
-            require('hapi-auth-jwt'),
-            require('inert'),
-            require('vision'),
-            {
-                'register': require('hapi-swagger'),
-                'options': {
-                    info: {
-                        'title': 'SinaVR API Documentation',
-                        'version': Pack.version,
-                    },
-                    securityDefinitions: {
-                        'jwt': {
-                            'type': 'apiKey',
-                            'name': 'Authorization',
-                            'in': 'header'
-                        }
-                    },
-                    debug: true
-                }
-            },
-            {
-                'register': require('restfulapigenerator'),
-                'options': {
-                    componentPath: __dirname + '/components/',
-                    db: require('./database').mongoose
-                }
-            },
-            require('./server.filter')
-        ],
-        initServer
-    );
-} else {
-    server.register(
-        [
-            require('hapi-auth-jwt'),
-        ],
-        initServer
-    );
-
-}
-
-server.start(function() {
-    console.log('Server running on port: ', server.info.uri)
+    server.start((err) => {
+        if (err) {
+            throw err;
+        }
+        server.log('info', 'Server running at: ' + server.info.uri);
+    });
 });
-
