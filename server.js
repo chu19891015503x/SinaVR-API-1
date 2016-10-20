@@ -5,9 +5,6 @@ var routes = require('./routes');
 var config = require('./config');
 var moment = require('moment');
 var UsersService = require('./components/users/users.service');
-var serverFilter = require('./server.filter')
-
-var generateApi = require('./generateapi')
 
 const Chalk = require('chalk');
 
@@ -38,27 +35,11 @@ var initServer = function () {
         validateFunc: UsersService.validateToken
     });
     server.route(routes);
-
-    generateApi(server, 'components', require('./database').mongoose);
-    serverFilter(server);
 }
 
 if(process.env.NODE_ENV == "development") {
     const Pack = require('./package')
-    const options = {
-        info: {
-            'title': 'SinaVR API Documentation',
-            'version': Pack.version,
-        },
-        securityDefinitions: {
-            'jwt': {
-                'type': 'apiKey',
-                'name': 'Authorization',
-                'in': 'header'
-            }
-        },
-        debug: true
-    };
+    const options =
 
     server.register(
         [
@@ -67,8 +48,29 @@ if(process.env.NODE_ENV == "development") {
             require('vision'),
             {
                 'register': require('hapi-swagger'),
-                'options': options
-            }
+                'options': {
+                    info: {
+                        'title': 'SinaVR API Documentation',
+                        'version': Pack.version,
+                    },
+                    securityDefinitions: {
+                        'jwt': {
+                            'type': 'apiKey',
+                            'name': 'Authorization',
+                            'in': 'header'
+                        }
+                    },
+                    debug: true
+                }
+            },
+            {
+                'register': require('restfulapigenerator'),
+                'options': {
+                    componentPath: __dirname + '/components/',
+                    db: require('./database').mongoose
+                }
+            },
+            require('./server.filter')
         ],
         initServer
     );

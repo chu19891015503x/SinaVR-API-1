@@ -22,7 +22,6 @@
   "dependencies": {
     "bcrypt": "~0.8.*",
     "boom": "~2.*",
-    "flocon-new": "0.0.5",
     "hapi": "~9.*",
     "hapi-auth-jwt": "~2.*",
     "imagemagick": "^0.1.3",
@@ -33,11 +32,10 @@
     "log4js-node-mongodb": "^2.2.0",
     "moment": "~2.*",
     "mongoose": "~4.*",
-    "mongoose-softdelete": "~0.6.*",
+    "restfulapigenerator": "^0.0.2",
     "mongoose-with-redis": "^0.1.1",
     "multiparty": "^4.1.2",
     "natural": "^0.2.1",
-    "require-all": "^2.0.0",
     "sign-url": "0.0.3",
     "walk": "^2.3.9"
   },

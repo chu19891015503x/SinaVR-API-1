@@ -8,7 +8,7 @@ var httpLogger = logs.getLogger('http');
 var errorLogger = logs.getLogger('error');
 var consoleLogger = logs.getLogger('console');
 
-module.exports = function (server) {
+module.exports.register = function (server, options, next) {
     server.ext({
         type: 'onRequest',
         method: function (request, reply) {
@@ -48,4 +48,11 @@ module.exports = function (server) {
             return reply.continue();
         }
     });
+
+    next();
 }
+
+module.exports.register.attributes = {
+    name: 'ServerFilter',
+    version: '0.0.1'
+};

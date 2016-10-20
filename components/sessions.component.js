@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const apiInfo = require('../generateapi').apiInfo;
+const apiInfo = require('restfulapigenerator').apiInfo;
 const Boom = require('boom');
 const  _ = require('lodash');
 
