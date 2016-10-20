@@ -15,6 +15,13 @@ module.exports = {
         username: 'SinaVR',
         password: 'h9dixwi4yrNHH8N5'
     },
+    cms: {
+        host: '127.0.0.1',
+        port: 27017,
+        db: 'nodercms',
+        username: 'nodercms',
+        password: 'nodercms'
+    },
     log: {
         host: '127.0.0.1',
         port: 27017,

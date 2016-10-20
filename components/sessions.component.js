@@ -6,7 +6,7 @@ const  _ = require('lodash');
 module.exports = {
     info: {
         name: 'Session',
-        version: '0.0.1'
+        version: '0.0.1',
     },
     Schema: {
         "userName"      : { type: String, required: true, unique: true, reply: false, trim: true, joi: Joi.string().email() },

@@ -32,7 +32,7 @@
     "log4js-node-mongodb": "^2.2.0",
     "moment": "~2.*",
     "mongoose": "~4.*",
-    "restfulapigenerator": "^0.0.2",
+    "restfulapigenerator": "^0.0.3",
     "mongoose-with-redis": "^0.1.1",
     "multiparty": "^4.1.2",
     "natural": "^0.2.1",

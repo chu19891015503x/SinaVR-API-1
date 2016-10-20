@@ -35,7 +35,7 @@ var plugins = [
         'register': require('restfulapigenerator'),
         'options': {
             componentPath: __dirname + '/components/',
-            db: require('./database').mongoose
+            db: require('./database').mainDB
         }
     },
     require('./server.filter')
