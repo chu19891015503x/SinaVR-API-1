@@ -9,7 +9,9 @@ gulp.task('default', function() {
 });
 
 gulp.task('develop', function () {
-    nodemon({ script: 'server.js',
+    nodemon({
+        script: 'server.js',
+        env: { 'NODE_ENV': 'development' },
         ext: 'js' })
         .on('restart', function () {
             console.log('restarted!')

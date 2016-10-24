@@ -23,7 +23,7 @@ module.exports = {
                 },
                 condition: function(request) {
                     return {
-                        id: {$lt: request.query.lastId},
+                        id: {$lt: request.query.lastId || Number.MAX_VALUE},
                         deleted: {$ne: true}
                     }
                 }
@@ -33,6 +33,9 @@ module.exports = {
                     _id: true,
                     id: false
                 }
+            },
+            remove: {
+
             }
         }
     }

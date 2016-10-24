@@ -51,8 +51,3 @@ module.exports = {
     }
 };
 
-// trick to allow convert sting into mongoose ObjectId
-String.prototype.toObjectId = function() {
-    var ObjectId = (require('mongoose').Types.ObjectId);
-    return new ObjectId(this.toString());
-};
