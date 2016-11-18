@@ -3,6 +3,7 @@
 var signUrl = require('sign-url')
 var config = require('./config');
 var logs = require('./logs');
+var crypto = require('crypto');
 
 var httpLogger = logs.getLogger('http');
 var errorLogger = logs.getLogger('error');
@@ -37,15 +38,19 @@ module.exports.register = function (server, options, next) {
                     return reply('请求已过期');
                 }
 
+                var deviceId = request.query.deviceId;
+                var token = crypto.createHash('md5').update(deviceId).digest('hex');
+
                 // http://my.superproject.io?confirm=username@somewhere.com&expiry=1392305771282&signature=SrO0X9p27LHFIe7xITBOpetZSpM%3D
-                if (!signUrl.check(url, config.token.privateKey)) {
+                if (!signUrl.check(url, token)) {
                     httpInfo['msg'] = '签名验证失败';
                     errorLogger.error(httpInfo);
                     return reply('签名验证失败');
                 }
             }
-
             return reply.continue();
+
+
         }
     });
 

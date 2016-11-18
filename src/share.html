@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>新浪VR</title>
+
+    <script src="./build/react.js"></script>
+    <script src="./build/react-dom.js"></script>
+    <script src="./build/browser.min.js"></script>
+    <script src="./build/jquery.min.js"></script>
+    <style>
+        body{
+            font-size:16px;
+            margin:0;
+        }
+        .header{
+            padding-left: 10px;
+            padding-right: 10px;
+            overflow: hidden;
+        }
+        .icon{
+            float:left;
+            height:35px;
+            margin-top:8px;
+            margin-right:8px;
+        }
+        .header span{
+            float:left;
+            height: 40px;
+            line-height:40px;
+            font-size:1.0rem;
+            margin-right:8px;
+            margin-top: 8px;
+        }
+        .download{
+            float:right;
+            height: 30px;
+            margin-top: 12px;
+        }
+        .delete{
+            float:right;
+            height: 15px;
+            margin-top: 20px;
+        }
+        .conTop{
+            padding:0 10px;
+        }
+        .conTop p{
+            width:100%;
+            height:40px;
+            line-height:40px;
+            font-size:0.9rem;
+            color:#282828;
+            font-family:'黑体';
+            margin:0;
+        }
+        .conItem{
+            padding:0 10px;
+        }
+        .conItem a{
+            display: block;
+            line-height: 0;
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+        }
+        .videoImg{
+            display:block;
+            margin:0 auto;
+            padding: 0;
+            width:100%;
+        }
+        .conItem p{
+            height:30px;
+            line-height:40px;
+            font-size:0.9rem;
+            color:#282828;
+            font-family:'黑体';
+            margin:0;
+            padding: 0;
+            text-overflow:ellipsis;
+            overflow: hidden;
+        }
+        .conFloor{
+            padding:0 10px;
+            overflow:hidden;
+            height:30px;
+        }
+        .conFloor img{
+            float:left;
+            height:12px;
+            margin-top:8px;
+            margin-right:5px;
+        }
+        .conFloor span{
+            float:left;
+            line-height:30px;
+            font-size:0.8rem;
+            color:#A1A1A1;
+            margin-right:8px;
+        }
+        .lineSpace{
+            width:100%;
+            height:12px;
+            background:#e1e1e1;
+        }
+        .space{
+            width: 100%;
+            height: 10px;
+            background: white;
+        }
+
+
+    </style>
+</head>
+<body>
+    <script type="text/javascript" src="http://media.qicdn.detu.com/@/sdk-1.1.0/sdk.js"></script>
+
+    <div id="container"></div>
+    <script type="text/babel">
+        var url = location.href;
+        var index = url.indexOf('?');
+        var id = url.substr(index + 1);
+        console.log('id:'+id);
+        //http://10.235.65.42:8080/shares?id=58253a7902bec623d5e1397d&lastId=0&pageSize=10
+        var url = 'http://10.235.65.42:8080/shares?id=' + id + '&lastId=0&pageSize=10';
+        console.log('url:'+url);
+
+
+        var VideoItem = React.createClass({
+            render: function() {
+                var host = 'http://video-sinavr.oss-cn-beijing.aliyuncs.com/';
+                var videoPath = this.props.data?this.props.data.extensions.videoList[0].src:'';
+                var imagePath = this.props.data?this.props.data.extensions.vrImageList[0].src:'';
+                var url = 'http://localhost:63342/SinaVR-API/src/play.html' + '?'+ videoPath + '&' + imagePath;
+                return <div>
+                            <div className="conItem">
+                                　<a href = {url}>
+                                     <img className="videoImg" ref="thumbnail" src={this.props.data?host+this.props.data.thumbnail.fileOssName:''}/>
+                                 </a>
+                                <p>{this.props.data?this.props.data.title:''}</p>
+                            </div>
+                            <div className="conFloor">
+                                <img src="./images/view@1x.png"/>
+                                <span>10万次</span>
+                                <span className="rightSpan">两天前</span>
+                            </div>
+                       </div>
+            },
+
+            componentDidMount:function () {
+                var screenWidth = screen.width;
+                var imgWidth = screenWidth - 20;
+                var imgHeight = imgWidth * 0.535;
+                var thumbnail = this.refs.thumbnail;
+                thumbnail.style.height = imgHeight + 'px';
+            }
+
+        });
+
+        var SharePage = React.createClass({
+            getInitialState: function() {
+                return {
+                    headData : [],
+                    listData : []
+                };
+            },
+
+            componentDidMount: function() {
+                $.get(this.props.url, function(result) {
+                    var headArr = result[0];
+                    var listArr = result[1];
+                    console.log('listArr:'+listArr);
+                    if (this.isMounted()) {
+                        this.setState({
+                            headData : headArr,
+                            listData : listArr,
+                        });
+
+                        console.log(this.state.headData)
+                    }
+                }.bind(this));
+            },
+
+            render: function () {
+                return <div>
+                            <div className="header">
+                                <img className="icon" src="images/icon@2x.png"/>
+                                <span>新浪VR</span>
+                                <img className="delete" src="images/delete@2x.png"/>
+                                <img className="download" src="images/vr_button.png"/>
+                            </div>
+                            <VideoItem data = {this.state.headData[0]}/>
+                            <div id="space_line"></div>
+                            <div className="lineSpace"></div>
+                            <div className="conTop">
+                                <p >推荐视频</p>
+                            </div>
+                            <VideoItem data = {this.state.listData[0]}/>
+                            <div className="space"></div>
+                            <VideoItem data = {this.state.listData[1]}/>
+                            <div className="space"></div>
+                            <VideoItem data = {this.state.listData[2]}/>
+                            <div className="space"></div>
+                       </div>
+            }
+        });
+
+        ReactDOM.render(
+                <SharePage url={url}/>,
+                document.getElementById('container')
+        );
+
+    </script>
+
+
+</body>
+</html>

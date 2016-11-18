@@ -27,6 +27,9 @@ cmsDB.once('open', function callback() {
     console.log('Connection with cmsdb succeeded');
 });
 
+
+
 module.exports.mongoose = mongoose;
 module.exports.cmsDB = cmsDB;
 module.exports.mainDB = mainDB;
+module.exports.ObjectId = mongoose.Types.ObjectId;
